@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClientsAndPayments.Core\ClientsAndPayments.Core.csproj" />
+  </ItemGroup>
+
 </Project>
