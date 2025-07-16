@@ -11,6 +11,7 @@
 *.sln.docstates
 # Rider
 .idea
+.vs
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)

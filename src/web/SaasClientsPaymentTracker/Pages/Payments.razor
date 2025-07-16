@@ -1,0 +1,86 @@
+﻿@page "/payments"
+@using SaasClientsPaymentTracker.Components;
+@using SaasClientsPaymentTracker.Models;
+@inject HttpClient Http;
+
+<h3>Payments</h3>
+
+<div class="row">
+    <!-- Left side: Payment table -->
+    <div class="col-md-6">
+        <h5>Existing Payments</h5>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client ID</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Paid At</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (payments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">No payments yet.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var p in payments)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>@p.ClientId</td>
+                            <td>@p.Amount</td>
+                            <td>@p.Currency</td>
+                            <td>@p.PaidAt.ToShortDateString()</td>
+                            <td>@p.Note</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Right side: Payment form -->
+    <div class="col-md-6">
+        @* <PaymentForm OnPaymentAdded="@AddPayment" /> *@
+        <PaymentForm/>
+    </div>
+</div>
+
+@code {
+    private List<PaymentModel> payments = new();
+    // private Payment[] payments
+
+    protected override async Task OnInitializedAsync()
+    {
+        // return base.OnInitializedAsync();
+        payments = await Http.GetFromJsonAsync<List<PaymentModel>>("api/Payments");
+        StateHasChanged();
+    }
+
+    private void AddPayment(PaymentModel newPayment)
+    {
+        // Simulate adding to a database (you might replace this later with a call to your API)
+        newPayment.Id = payments.Count + 1;
+        payments.Add(newPayment);
+        StateHasChanged();
+    }
+}
+
+
+
+@* @page "/payments"
+@using SaasClientsPaymentTracker.Components;
+
+<h3>Payments</h3>
+<PaymentForm></PaymentForm>
+
+@code {
+
+}
+ *@
