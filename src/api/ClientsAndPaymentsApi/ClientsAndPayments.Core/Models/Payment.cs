@@ -14,5 +14,7 @@ namespace ClientsAndPayments.Core.Models
         public DateTime PaidAt { get; set; }
         [StringLength(120)]
         public string Note { get; set; } = string.Empty;
+        // Navigation property
+        public Client? Client { get; set; }
     }
 }

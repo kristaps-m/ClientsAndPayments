@@ -10,5 +10,8 @@ namespace ClientsAndPayments.Core.Models
         public string Email { get; set; } = string.Empty;
         [Required]
         public DateTime RegistredAt {  get; set; }
+
+        // Navigation property
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }
