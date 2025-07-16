@@ -1,7 +1,6 @@
 ﻿using ClientsAndPayments.Core.DataTransverModels;
 using ClientsAndPayments.Core.Interfaces;
 using ClientsAndPayments.Core.Models;
-using ClientsAndPayments.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClientsAndPaymentsApi.Controllers
@@ -27,9 +26,23 @@ namespace ClientsAndPaymentsApi.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
-        public IActionResult CreateClient(CreateClientDto clientDto)
+        [HttpGet("{id}")]
+        public IActionResult GetClientDetails(int id)
         {
+            var client = _clientService.GetClientAndTheirPayments(id);
+
+            if (client == null)
+                return NotFound($"Client with ID {id} not found.");
+
+            return Ok(client);
+        }
+
+        [HttpPost]
+        public IActionResult CreateClient([FromBody] CreateClientDto clientDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var client = new Client
             {
                 Name = clientDto.Name,
@@ -41,6 +54,26 @@ namespace ClientsAndPaymentsApi.Controllers
 
             return Created("Client created!", client);
         }
+
+
+
+        // UPDATE here....
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteClient(int id)
+        {
+            var client = _clientService.GetById(id);
+            if (client == null)
+            {
+                return NotFound($"Client with ID {id} not found.");
+            }
+
+            _clientService.Delete(client);
+
+            return NoContent(); // HTTP 204
+        }
+
+        // List a clientʼs payments. Ascending PaidAt order.
 
         [HttpPost("{id}/payments")]
         public IActionResult AddPayment(int id, [FromBody] CreatePaymentDto paymentDto)

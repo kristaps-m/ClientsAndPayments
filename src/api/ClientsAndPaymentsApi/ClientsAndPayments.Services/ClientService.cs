@@ -1,4 +1,5 @@
-﻿using ClientsAndPayments.Core.Interfaces;
+﻿using ClientsAndPayments.Core.DataTransverModels;
+using ClientsAndPayments.Core.Interfaces;
 using ClientsAndPayments.Core.Models;
 using ClientsAndPayments.Data;
 
@@ -34,6 +35,37 @@ namespace ClientsAndPayments.Services
                 Page = page,
                 PageSize = pageSize,
                 Data = clients
+            };
+        }
+
+        public ClientDetailsAndPayments? GetClientAndTheirPayments(int id)
+        {
+            var client = _context.Clients.FirstOrDefault((c) => c.Id == id);
+            if (client == null) return null;
+
+            //var payments = _context.Payments.Where((p) => p.ClientId == id).ToList();
+            var payments = _context.Payments
+            .Where(p => p.ClientId == id)
+            .Select(p => new PaymentDto
+            {
+                Id = p.Id,
+                Amount = p.Amount,
+                Currency = p.Currency,
+                PaidAt = p.PaidAt,
+                Note = p.Note
+            })
+            .ToList();
+
+            //return payments;
+            //client.Payments = payments;
+
+            return new ClientDetailsAndPayments
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Email = client.Email,
+                RegistredAt = client.RegistredAt,
+                Payments = payments
             };
         }
     }
