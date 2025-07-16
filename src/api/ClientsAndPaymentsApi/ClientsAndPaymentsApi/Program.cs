@@ -1,3 +1,7 @@
+using ClientsAndPayments.Core.Interfaces;
+using ClientsAndPayments.Data;
+using ClientsAndPayments.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,6 +12,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+// Register services and interfaces;
+builder.Services.AddScoped<IClientsAndPaymentsDbContext, ClientsAndPaymentsDbContext>();
+builder.Services.AddScoped<IDbService, DbService>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

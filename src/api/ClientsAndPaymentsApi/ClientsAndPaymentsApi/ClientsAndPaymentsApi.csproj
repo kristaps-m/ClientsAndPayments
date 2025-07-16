@@ -10,4 +10,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClientsAndPayments.Core\ClientsAndPayments.Core.csproj" />
+    <ProjectReference Include="..\ClientsAndPayments.Data\ClientsAndPayments.Data.csproj" />
+    <ProjectReference Include="..\ClientsAndPayments.Services\ClientsAndPayments.Services.csproj" />
+  </ItemGroup>
+
 </Project>
