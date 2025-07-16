@@ -1,4 +1,5 @@
-﻿using ClientsAndPayments.Core.Interfaces;
+﻿using ClientsAndPayments.Core.DataTransverModels;
+using ClientsAndPayments.Core.Interfaces;
 using ClientsAndPayments.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,17 +16,24 @@ namespace ClientsAndPaymentsApi.Controllers
             _clientService = clientService;
         }
 
-        [Route("")]
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string? search, int page = 1, int pageSize = 10)
         {
-            var entities = _clientService.GetAll();
-            return Ok(entities);
+            var result = _clientService.GetPagedClients(search, page, pageSize);
+
+            return Ok(result);
         }
 
         [HttpPost]
-        public IActionResult CreateClient(Client client)
+        public IActionResult CreateClient(CreateClientDto clientDto)
         {
+            var client = new Client
+            {
+                Name = clientDto.Name,
+                Email = clientDto.Email,
+                RegistredAt = DateTime.UtcNow.AddHours(-2)
+            };
+
             _clientService.Create(client);
 
             return Created("Client created!", client);
