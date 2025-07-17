@@ -9,7 +9,7 @@ namespace ClientsAndPayments.Services
     {
         public ClientService(IClientsAndPaymentsDbContext context) : base(context){ }
 
-        public PagedResult<Client> GetPagedClients(string? search, int page = 1, int pageSize = 10)
+        public PagedResult<ReturnClientDto> GetPagedClients(string? search, int page = 1, int pageSize = 10)
         {
             var query = _context.Clients.AsQueryable();
 
@@ -27,14 +27,24 @@ namespace ClientsAndPayments.Services
                 .OrderBy(c => c.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(c => new ReturnClientDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Email = c.Email,
+                    RegistredAt = c.RegistredAt
+                })
                 .ToList();
 
-            return new PagedResult<Client>
+            var totalPaidSum = _context.Payments.AsEnumerable().Sum(p => p.Amount);
+
+            return new PagedResult<ReturnClientDto>
             {
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize,
-                Data = clients
+                Data = clients,
+                ClientsTotalPaidAmount = totalPaidSum
             };
         }
 
@@ -42,8 +52,7 @@ namespace ClientsAndPayments.Services
         {
             var client = _context.Clients.FirstOrDefault((c) => c.Id == id);
             if (client == null) return null;
-
-            //var payments = _context.Payments.Where((p) => p.ClientId == id).ToList();
+            
             var payments = _context.Payments
             .Where(p => p.ClientId == id)
             .Select(p => new PaymentDto
@@ -56,9 +65,6 @@ namespace ClientsAndPayments.Services
             })
             .ToList();
 
-            //return payments;
-            //client.Payments = payments;
-
             return new ClientDetailsAndPayments
             {
                 Id = client.Id,
@@ -67,6 +73,23 @@ namespace ClientsAndPayments.Services
                 RegistredAt = client.RegistredAt,
                 Payments = payments
             };
+        }
+
+        public List<PaymentDto> GetClientsPayments(int id)
+        {
+            var payments = _context.Payments
+                .Where(p => p.ClientId == id)
+                .OrderBy(p => p.PaidAt)
+                .Select(p => new PaymentDto
+                {
+                    Id = p.Id,
+                    Amount = p.Amount,
+                    Currency = p.Currency,
+                    PaidAt = p.PaidAt,
+                    Note = p.Note
+                }).ToList();
+
+            return payments;
         }
     }
 }

@@ -55,9 +55,25 @@ namespace ClientsAndPaymentsApi.Controllers
             return Created("Client created!", client);
         }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateClient([FromBody] CreateClientDto newClientDto, int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var existingClient = _clientService.GetById(id);
+            if (existingClient == null)
+            {
+                return NotFound();
+            }
 
-        // UPDATE here....
+            existingClient.Name = newClientDto.Name;
+            existingClient.Email = newClientDto.Email;
+
+            _clientService.Update(existingClient);
+
+            return Ok(existingClient);
+        }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteClient(int id)
@@ -73,7 +89,17 @@ namespace ClientsAndPaymentsApi.Controllers
             return NoContent(); // HTTP 204
         }
 
-        // List a clientʼs payments. Ascending PaidAt order.
+        [HttpGet("{id}/payments")]
+        public IActionResult GetClientsPayments(int id)
+        {
+            var clientsPayments = _clientService.GetClientsPayments(id);
+            if (clientsPayments == null)
+            {
+                return NotFound($"Client with ID {id} not found.");
+            }
+
+            return Ok(clientsPayments);
+        }
 
         [HttpPost("{id}/payments")]
         public IActionResult AddPayment(int id, [FromBody] CreatePaymentDto paymentDto)

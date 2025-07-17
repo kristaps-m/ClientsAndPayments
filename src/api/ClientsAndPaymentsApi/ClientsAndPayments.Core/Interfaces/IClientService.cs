@@ -5,7 +5,8 @@ namespace ClientsAndPayments.Core.Interfaces
 {
     public interface IClientService:IEntityService<Client>
     {
-        PagedResult<Client> GetPagedClients(string? search, int page = 1, int pageSize = 10);
+        PagedResult<ReturnClientDto> GetPagedClients(string? search, int page = 1, int pageSize = 10);
         ClientDetailsAndPayments? GetClientAndTheirPayments(int id);
+        List<PaymentDto> GetClientsPayments(int id);
     }
 }
