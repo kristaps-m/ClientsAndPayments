@@ -59,7 +59,7 @@
     protected override async Task OnInitializedAsync()
     {
         // return base.OnInitializedAsync();
-        payments = await Http.GetFromJsonAsync<List<PaymentModel>>("api/Payments");
+        payments = await Http.GetFromJsonAsync<List<PaymentModel>>("http://localhost:5100/api/Payment/all");
         StateHasChanged();
     }
 
