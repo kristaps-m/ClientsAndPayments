@@ -1,0 +1,49 @@
+﻿@* <h3>Clients</h3>
+
+@code {
+
+}
+ *@
+ @page "/clients"
+ @using SaasClientsPaymentTracker.Models
+@typeparam TItem
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Total Paid</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (clients.Count == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No payments yet.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var client in clients)
+            {
+                <tr>
+                    <td>@client.Id</td>
+                    <td>@client.Name</td>
+                    <td>@client.Email</td>
+                    <td>@client.TotalPaid</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" @onclick="@(() => OnSelect.InvokeAsync(client))">Details</button>
+                    </td>
+                </tr>
+            }            
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public List<Client> clients { get; set; } = new();
+    [Parameter] public EventCallback<Client> OnSelect { get; set; }
+}
