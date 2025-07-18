@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ClientsAndPaymentsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/payments")]
     [ApiController]
     public class PaymentController : ControllerBase
     {
@@ -14,12 +14,20 @@ namespace ClientsAndPaymentsApi.Controllers
             _paymentService = paymentService;
         }
 
-        [Route("all")]
-        [HttpGet]
-        public IActionResult GetAll()
+        [HttpGet("recent")]
+        public IActionResult GetLatestPayments()
         {
-            var entities = _paymentService.GetAll();
-            return Ok(entities);
+            var latest20Payments = _paymentService.GetLatest20Payments();
+
+            return Ok(latest20Payments);
         }
+
+        //[Route("all")]
+        //[HttpGet]
+        //public IActionResult GetAll()
+        //{
+        //    var entities = _paymentService.GetAll();
+        //    return Ok(entities);
+        //}
     }
 }

@@ -9,6 +9,45 @@ namespace ClientsAndPayments.Services
     {
         public ClientService(IClientsAndPaymentsDbContext context) : base(context){ }
 
+        //public PagedResult<ReturnClientDto> GetPagedClients(string? search, int page = 1, int pageSize = 10)
+        //{
+        //    var query = _context.Clients.AsQueryable();
+
+        //    if (!string.IsNullOrWhiteSpace(search))
+        //    {
+        //        search = search.ToLower();
+        //        query = query.Where(c =>
+        //            c.Name.ToLower().Contains(search) ||
+        //            c.Email.ToLower().Contains(search));
+        //    }
+
+        //    var totalCount = query.Count();
+
+        //    var clients = query
+        //        .OrderBy(c => c.Name)
+        //        .Skip((page - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .Select(c => new ReturnClientDto
+        //        {
+        //            Id = c.Id,
+        //            Name = c.Name,
+        //            Email = c.Email,
+        //            RegistredAt = c.RegistredAt
+        //        })
+        //        .ToList();
+
+        //    var totalPaidSum = _context.Payments.AsEnumerable().Sum(p => p.Amount);
+
+        //    return new PagedResult<ReturnClientDto>
+        //    {
+        //        TotalCount = totalCount,
+        //        Page = page,
+        //        PageSize = pageSize,
+        //        Data = clients,
+        //        ClientsTotalPaidAmount = totalPaidSum
+        //    };
+        //}
+
         public PagedResult<ReturnClientDto> GetPagedClients(string? search, int page = 1, int pageSize = 10)
         {
             var query = _context.Clients.AsQueryable();
@@ -23,10 +62,19 @@ namespace ClientsAndPayments.Services
 
             var totalCount = query.Count();
 
-            var clients = query
+            var pagedClients = query
                 .OrderBy(c => c.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .ToList();
+
+            var clientIds = pagedClients.Select(c => c.Id).ToList();
+
+            var totalPaidSum = _context.Payments.AsEnumerable()
+                .Where(p => clientIds.Contains(p.ClientId))
+                .Sum(p => p.Amount);
+
+            var clients = pagedClients
                 .Select(c => new ReturnClientDto
                 {
                     Id = c.Id,
@@ -35,8 +83,6 @@ namespace ClientsAndPayments.Services
                     RegistredAt = c.RegistredAt
                 })
                 .ToList();
-
-            var totalPaidSum = _context.Payments.AsEnumerable().Sum(p => p.Amount);
 
             return new PagedResult<ReturnClientDto>
             {
@@ -47,6 +93,7 @@ namespace ClientsAndPayments.Services
                 ClientsTotalPaidAmount = totalPaidSum
             };
         }
+
 
         public ClientDetailsAndPayments? GetClientAndTheirPayments(int id)
         {
