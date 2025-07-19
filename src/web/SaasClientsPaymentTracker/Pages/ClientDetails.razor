@@ -1,0 +1,126 @@
+﻿@* <h3>ClientDetails</h3>
+
+@code {
+
+}
+ *@
+
+@page "/clients/{id:int}"
+@inject HttpClient Http
+
+<h3>Client Details</h3>
+
+@if (client == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-3">
+        <h4>@client.Name (@client.Email)</h4>
+        <p><strong>Registered:</strong> @client.RegistredAt.ToShortDateString()</p>
+
+        <h5>Payments</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>PaidAt</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var payment in client.Payments)
+                {
+                    <tr>
+                        <td>@payment.Id</td>
+                        <td>@payment.Amount</td>
+                        <td>@payment.Currency</td>
+                        <td>@payment.PaidAt.ToShortDateString()</td>
+                        <td>@payment.Note</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <p><strong>Total Amount:</strong> @client.TotalAmount</p>
+
+        <hr />
+
+        <h5>Add Payment</h5>
+        <EditForm Model="@newPayment" OnValidSubmit="@AddPayment">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-2">
+                <label>Amount</label>
+                <InputNumber @bind-Value="newPayment.Amount" class="form-control" />
+            </div>
+            <div class="mb-2">
+                <label>Currency</label>
+                <InputSelect @bind-Value="newPayment.Currency" class="form-control">
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                </InputSelect>
+            </div>
+            <div class="mb-2">
+                <label>Note</label>
+                <InputText @bind-Value="newPayment.Note" class="form-control" />
+            </div>
+            <button class="btn btn-primary" type="submit">Add Payment</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private ClientDetailsDto? client;
+    private CreatePaymentDto newPayment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = await Http.GetFromJsonAsync<ClientDetailsDto>($"http://localhost:5100/api/clients/{id}");
+    }
+
+    private async Task AddPayment()
+    {
+        newPayment.PaidAt = DateTime.UtcNow.AddHours(-2); // Adjust as needed
+
+        var response = await Http.PostAsJsonAsync($"http://localhost:5100/api/clients/{id}/payments", newPayment);
+        if (response.IsSuccessStatusCode)
+        {
+            // Reload client info
+            client = await Http.GetFromJsonAsync<ClientDetailsDto>($"http://localhost:5100/api/clients/{id}");
+            newPayment = new(); // Clear form
+        }
+    }
+
+    public class CreatePaymentDto
+    {
+        public decimal Amount { get; set; }
+        public string Currency { get; set; } = "EUR";
+        public string Note { get; set; } = string.Empty;
+        public DateTime PaidAt { get; set; }
+    }
+
+    public class ClientDetailsDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public DateTime RegistredAt { get; set; }
+        public decimal TotalAmount { get; set; }
+        public List<PaymentDto> Payments { get; set; } = new();
+    }
+
+    public class PaymentDto
+    {
+        public int Id { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; } = "";
+        public DateTime PaidAt { get; set; }
+        public string Note { get; set; } = "";
+    }
+}

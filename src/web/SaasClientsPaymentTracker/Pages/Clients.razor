@@ -1,12 +1,7 @@
-﻿@* <h3>Clients</h3>
-
-@code {
-
-}
- *@
- @page "/clients"
- @using SaasClientsPaymentTracker.Models
-@typeparam TItem
+﻿
+@page "/clients"
+@using SaasClientsPaymentTracker.Models
+@inject HttpClient Http;
 
 <table class="table">
     <thead>
@@ -19,7 +14,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (clients.Count == 0)
+        @if (clients.TotalCount == 0)
         {
             <tr>
                 <td colspan="6" class="text-center">No payments yet.</td>
@@ -27,7 +22,7 @@
         }
         else
         {
-            @foreach (var client in clients)
+            @foreach (var client in clients.Data)
             {
                 <tr>
                     <td>@client.Id</td>
@@ -35,7 +30,7 @@
                     <td>@client.Email</td>
                     <td>@client.TotalPaid</td>
                     <td>
-                        <button class="btn btn-sm btn-info" @onclick="@(() => OnSelect.InvokeAsync(client))">Details</button>
+                        <NavLink class="btn btn-sm btn-info" href="@($"/clients/{client.Id}")">Details</NavLink>
                     </td>
                 </tr>
             }            
@@ -44,6 +39,11 @@
 </table>
 
 @code {
-    [Parameter] public List<Client> clients { get; set; } = new();
-    [Parameter] public EventCallback<Client> OnSelect { get; set; }
+    [Parameter] public PagedResult<ReturnClientDto> clients { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await Http.GetFromJsonAsync<PagedResult<ReturnClientDto>>("http://localhost:5100/api/clients");
+        StateHasChanged();
+    }
 }

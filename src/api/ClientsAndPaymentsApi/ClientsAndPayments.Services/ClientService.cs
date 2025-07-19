@@ -74,13 +74,18 @@ namespace ClientsAndPayments.Services
                 .Where(p => clientIds.Contains(p.ClientId))
                 .Sum(p => p.Amount);
 
+            var allPayments = _context.Payments.AsEnumerable();
+
             var clients = pagedClients
                 .Select(c => new ReturnClientDto
                 {
                     Id = c.Id,
                     Name = c.Name,
                     Email = c.Email,
-                    RegistredAt = c.RegistredAt
+                    RegistredAt = c.RegistredAt,
+                    TotalPaid = allPayments
+                        .Where(p => p.ClientId == c.Id)
+                        .Sum(p => p.Amount)
                 })
                 .ToList();
 
@@ -118,6 +123,7 @@ namespace ClientsAndPayments.Services
                 Name = client.Name,
                 Email = client.Email,
                 RegistredAt = client.RegistredAt,
+                TotalAmount = payments.Sum(p => p.Amount),
                 Payments = payments
             };
         }

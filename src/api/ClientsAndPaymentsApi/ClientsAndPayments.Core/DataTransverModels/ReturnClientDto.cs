@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public DateTime RegistredAt { get; set; }
-
+        public decimal TotalPaid { get; set; }
     }
 }
