@@ -3,6 +3,7 @@
 @using SaasClientsPaymentTracker.Models
 @inject HttpClient Http;
 
+<NavLink class="btn btn-success mb-2" href="@("/clients/add")">Add Client</NavLink>
 <table class="table">
     <thead>
         <tr>
@@ -31,6 +32,7 @@
                     <td>@client.TotalPaid</td>
                     <td>
                         <NavLink class="btn btn-sm btn-info" href="@($"/clients/{client.Id}")">Details</NavLink>
+                        <NavLink class="btn btn-sm btn-warning mx-1" href="@($"/clients/edit/{client.Id}")">Edit</NavLink>
                     </td>
                 </tr>
             }            

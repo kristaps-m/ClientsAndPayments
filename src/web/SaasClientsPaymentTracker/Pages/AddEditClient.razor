@@ -1,0 +1,150 @@
+﻿@page "/clients/add"
+@page "/clients/edit/{Id:int}"
+@using SaasClientsPaymentTracker.Models
+
+@inject HttpClient Http
+@* @inject NavigationManager NavigationManager *@
+@inject NavigationManager Navigation
+
+<h3>@(IsEditMode ? "Edit Client" : "Add Client")</h3>
+
+<EditForm Model="formModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group mb-3">
+        <label for="name">Name</label>
+        <InputText class="form-control" id="name" @bind-Value="formModel.Name" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="email">Email</label>
+        <InputText class="form-control" id="email" @bind-Value="formModel.Email" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="registered">Registered At</label>
+        <InputDate class="form-control" id="registered" @bind-Value="formModel.RegistredAt" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">@SubmitButtonLabel</button>
+    @* <button type="button" class="btn btn-secondary ms-2" @onclick="() => NavigationManager.NavigateTo("/clients")">Cancel</button> *@
+    <button type="button" class="btn btn-secondary ms-2" @onclick="NavigateToClientsComponent">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private void NavigateToClientsComponent() => Navigation.NavigateTo("/clients");
+
+    private bool IsEditMode => Id.HasValue;
+
+    private string SubmitButtonLabel => IsEditMode ? "Update" : "Create";
+
+    private CreateClientDto formModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditMode)
+        {
+            var client = await Http.GetFromJsonAsync<UpdateClientDto>($"http://localhost:5100/api/clients/{Id}");
+
+            if (client is not null)
+            {
+                formModel = new CreateClientDto
+                {
+                    Name = client.Name,
+                    Email = client.Email,
+                    RegistredAt = client.RegistredAt
+                };
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (IsEditMode)
+        {
+            var updateModel = new UpdateClientDto
+            {
+                Id = Id!.Value,
+                Name = formModel.Name,
+                Email = formModel.Email,
+                RegistredAt = formModel.RegistredAt
+            };
+
+            await Http.PutAsJsonAsync($"http://localhost:5100/api/clients/{Id}", updateModel);
+        }
+        else
+        {
+            await Http.PostAsJsonAsync("http://localhost:5100/api/clients", formModel);
+        }
+
+        Navigation.NavigateTo("/clients");
+    }
+}
+
+
+
+@* @page "/clients/add"
+@page "/clients/edit/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>@(IsEditMode ? "Edit Client" : "Add Client")</h3>
+
+<EditForm Model="@client" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Name</label>
+        <InputText class="form-control" @bind-Value="client.Name" />
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <InputText class="form-control" @bind-Value="client.Email" />
+    </div>
+
+    <div class="form-group">
+        <label>Registered At</label>
+        <InputDate class="form-control" @bind-Value="client.RegistredAt" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private Client client = new();
+    private bool IsEditMode => Id.HasValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditMode)
+        {
+            client = await Http.GetFromJsonAsync<Client>($"http://localhost:5100/api/clients/{Id}");
+        }
+        else
+        {
+            client.RegistredAt = DateTime.UtcNow;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (IsEditMode)
+        {
+            await Http.PutAsJsonAsync($"http://localhost:5100/api/clients/{Id}", client);
+        }
+        else
+        {
+            await Http.PostAsJsonAsync("http://localhost:5100/api/clients", client);
+        }
+
+        NavigationManager.NavigateTo("/clients");
+    }
+}
+ *@
